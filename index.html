@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Turf Cricket Season 3</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+header{
+  background:linear-gradient(135deg,#111827,#14532d);
+  padding:25px 15px;
+  text-align:center;
+}
+header h1{margin:0;font-size:30px}
+header p{color:#bbf7d0;margin:7px 0 0}
+
+nav{
+  display:flex;
+  overflow:auto;
+  gap:8px;
+  padding:10px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+nav button{
+  border:0;
+  background:#1f2937;
+  color:#fff;
+  padding:11px 15px;
+  border-radius:8px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+nav button.active,nav button:hover{background:#16a34a}
+
+.container{max-width:1100px;margin:auto;padding:18px}
+.section{display:none}
+.section.active{display:block}
+
+.card{
+  background:#111827;
+  border:1px solid #263244;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:15px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+
+input,select{
+  width:100%;
+  padding:11px;
+  margin:6px 0 10px;
+  border:1px solid #374151;
+  border-radius:8px;
+  background:#0f172a;
+  color:#fff;
+}
+button{
+  cursor:pointer;
+}
+.btn{
+  border:0;
+  padding:10px 14px;
+  border-radius:8px;
+  background:#16a34a;
+  color:#fff;
+  font-weight:bold;
+}
+.btn.red{background:#dc2626}
+.btn.blue{background:#2563eb}
+.btn.gray{background:#374151}
+
+.player,.team{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.player strong,.team strong{font-size:17px}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:20px;
+  background:#14532d;
+  color:#bbf7d0;
+  font-size:12px;
+}
+
+.score{
+  font-size:40px;
+  font-weight:bold;
+  text-align:center;
+  margin:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  overflow:hidden;
+}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #263244;
+  text-align:left;
+}
+th{background:#1f2937}
+
+.notice{
+  padding:12px;
+  background:#172554;
+  border-radius:9px;
+  margin-bottom:12px;
+}
+
+.empty{
+  text-align:center;
+  padding:25px;
+  color:#9ca3af;
+}
+
+@media(max-width:600px){
+ header h1{font-size:24px}
+ .container{padding:10px}
+ .score{font-size:32px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🏏 TURF CRICKET</h1>
+  <p>SEASON 3 • Tournament Management</p>
+</header>
+
+<nav>
+  <button onclick="showTab('dashboard')" class="active">🏠 Dashboard</button>
+  <button onclick="showTab('players')">👤 Players</button>
+  <button onclick="showTab('teams')">🛡️ Teams</button>
+  <button onclick="showTab('squads')">👥 Squads</button>
+  <button onclick="showTab('auction')">🔨 Auction</button>
+  <button onclick="showTab('scoring')">🏏 Live Score</button>
+  <button onclick="showTab('points')">🏆 Points</button>
+</nav>
+
+<main class="container">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="section active">
+  <div class="grid">
+    <div class="card">
+      <h3>👤 Players</h3>
+      <h2 id="playerCount">0</h2>
+    </div>
+    <div class="card">
+      <h3>🛡️ Teams</h3>
+      <h2 id="teamCount">0</h2>
+    </div>
+    <div class="card">
+      <h3>🔨 Sold Players</h3>
+      <h2 id="soldCount">0</h2>
+    </div>
+    <div class="card">
+      <h3>💰 Auction Value</h3>
+      <h2>₹<span id="auctionValue">0</span></h2>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Quick Actions</h2>
+    <button class="btn" onclick="showTab('players')">+ Add Player</button>
+    <button class="btn blue" onclick="showTab('teams')">+ Add Team</button>
+    <button class="btn gray" onclick="showTab('auction')">🔨 Start Auction</button>
+  </div>
+
+  <div class="card">
+    <h2>⚠️ Data Controls</h2>
+    <p>Resetting will permanently remove all players, teams, squads and scores saved in this browser.</p>
+    <button class="btn red" onclick="resetAll()">♻ Reset All Data</button>
+  </div>
+</section>
+
+
+<!-- PLAYERS -->
+<section id="players" class="section">
+  <div class="card">
+    <h2>👤 Add Player</h2>
+
+    <input id="playerName" placeholder="Player name">
+
+    <select id="playerRole">
+      <option>Batsman</option>
+      <option>Bowler</option>
+      <option>All-rounder</option>
+      <option>Wicket Keeper</option>
+    </select>
+
+    <input id="basePrice" type="number" placeholder="Base price">
+
+    <button class="btn" onclick="addPlayer()">+ Add Player</button>
+  </div>
+
+  <div class="card">
+    <h2>Players List</h2>
+    <div id="playersList"></div>
+  </div>
+</section>
+
+
+<!-- TEAMS -->
+<section id="teams" class="section">
+  <div class="card">
+    <h2>🛡️ Add Team</h2>
+
+    <input id="teamName" placeholder="Team name">
+    <input id="teamOwner" placeholder="Owner / Captain">
+    <input id="teamBudget" type="number" value="100000" placeholder="Auction purse">
+
+    <button class="btn" onclick="addTeam()">+ Add Team</button>
+  </div>
+
+  <div class="card">
+    <h2>Teams</h2>
+    <div id="teamsList"></div>
+  </div>
+</section>
+
+
+<!-- SQUADS -->
+<section id="squads" class="section">
+  <div class="card">
+    <h2>👥 Team Squads</h2>
+    <div id="squadsList"></div>
+  </div>
+</section>
+
+
+<!-- AUCTION -->
+<section id="auction" class="section">
+
+  <div class="card">
+    <h2>🔨 Player Auction</h2>
+
+    <select id="auctionPlayer"></select>
+
+    <input id="bidAmount" type="number" placeholder="Bid amount">
+
+    <select id="bidTeam"></select>
+
+    <button class="btn blue" onclick="sellPlayer()">🔨 SOLD</button>
+  </div>
+
+  <div class="notice">
+    Select a player, enter the final bid and select the team.
+    The player will automatically be added to that team's squad.
+  </div>
+
+  <div class="card">
+    <h2>📜 Auction History</h2>
+    <div id="auctionHistory"></div>
+  </div>
+
+</section>
+
+
+<!-- SCORING -->
+<section id="scoring" class="section">
+
+  <div class="card">
+    <h2>🏏 Live Scoring</h2>
+
+    <input id="battingTeam" placeholder="Batting team">
+
+    <div class="score">
+      <span id="runs">0</span>/<span id="wickets">0</span>
+    </div>
+
+    <p style="text-align:center">
+      Overs: <b id="overs">0.0</b>
+    </p>
+
+    <div class="grid">
+      <button class="btn" onclick="addRun(0)">Dot Ball</button>
+      <button class="btn" onclick="addRun(1)">+1 Run</button>
+      <button class="btn" onclick="addRun(2)">+2 Runs</button>
+      <button class="btn" onclick="addRun(3)">+3 Runs</button>
+      <button class="btn" onclick="addRun(4)">4️⃣ FOUR</button>
+      <button class="btn" onclick="addRun(6)">6️⃣ SIX</button>
+      <button class="btn red" onclick="addWicket()">❌ WICKET</button>
+      <button class="btn gray" onclick="resetScore()">Reset Score</button>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- POINTS -->
+<section id="points" class="section">
+  <div class="card">
+    <h2>🏆 Points Table</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Team</th>
+          <th>Played</th>
+          <th>Won</th>
+          <th>Lost</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody id="pointsTable"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script>
+
+/* =========================
+   DATA
+========================= */
+
+let players =
+JSON.parse(localStorage.getItem("turf_players")) || [];
+
+let teams =
+JSON.parse(localStorage.getItem("turf_teams")) || [];
+
+let auction =
+JSON.parse(localStorage.getItem("turf_auction")) || [];
+
+let score =
+JSON.parse(localStorage.getItem("turf_score")) ||
+{runs:0,wickets:0,balls:0};
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function showTab(id){
+
+ document.querySelectorAll(".section")
+ .forEach(s=>s.classList.remove("active"));
+
+ document.getElementById(id)
+ .classList.add("active");
+
+ document.querySelectorAll("nav button")
+ .forEach(b=>b.classList.remove("active"));
+
+ event.target.classList.add("active");
+
+ renderAll();
+}
+
+
+/* =========================
+   PLAYERS
+========================= */
+
+function addPlayer(){
+
+ const name =
+ document.getElementById("playerName").value.trim();
+
+ const role =
+ document.getElementById("playerRole").value;
+
+ const base =
+ Number(document.getElementById("basePrice").value);
+
+ if(!name){
+   alert("Enter player name");
+   return;
+ }
+
+ players.push({
+   id:Date.now(),
+   name,
+   role,
+   base,
+   sold:false,
+   team:null,
+   price:0
+ });
+
+ save();
+
+ document.getElementById("playerName").value="";
+ document.getElementById("basePrice").value="";
+
+ renderAll();
+}
+
+
+function deletePlayer(id){
+
+ if(confirm("Delete this player?")){
+   players=players.filter(p=>p.id!==id);
+   save();
+   renderAll();
+ }
+}
+
+
+/* =========================
+   TEAMS
+========================= */
+
+function addTeam(){
+
+ const name =
+ document.getElementById("teamName").value.trim();
+
+ const owner =
+ document.getElementById("teamOwner").value.trim();
+
+ const budget =
+ Number(document.getElementById("teamBudget").value);
+
+ if(!name){
+   alert("Enter team name");
+   return;
+ }
+
+ teams.push({
+   id:Date.now(),
+   name,
+   owner,
+   budget,
+   spent:0,
+   wins:0,
+   losses:0,
+   played:0,
+   points:0,
+   squad:[]
+ });
+
+ save();
+
+ document.getElementById("teamName").value="";
+ document.getElementById("teamOwner").value="";
+
+ renderAll();
+}
+
+
+function deleteTeam(id){
+
+ if(confirm("Delete this team?")){
+   teams=teams.filter(t=>t.id!==id);
+   save();
+   renderAll();
+ }
+}
+
+
+/* =========================
+   AUCTION
+========================= */
+
+function sellPlayer(){
+
+ const pid =
+ Number(document.getElementById("auctionPlayer").value);
+
+ const tid =
+ Number(document.getElementById("bidTeam").value);
+
+ const amount =
+ Number(document.getElementById("bidAmount").value);
+
+ const player =
+ players.find(p=>p.id===pid);
+
+ const team =
+ teams.find(t=>t.id===tid);
+
+ if(!player || !team || !amount){
+   alert("Complete auction details");
+   return;
+ }
+
+ if(player.sold){
+   alert("Player already sold");
+   return;
+ }
+
+ if(amount < player.base){
+   alert("Bid cannot be below base price");
+   return;
+ }
+
+ if(team.budget-team.spent < amount){
+   alert("Team does not have enough purse!");
+   return;
+ }
+
+ player.sold=true;
+ player.team=team.id;
+ player.price=amount;
+
+ team.spent += amount;
+ team.squad.push(player.id);
+
+ auction.unshift({
+   player:player.name,
+   team:team.name,
+   amount,
+   time:new Date().toLocaleTimeString()
+ });
+
+ save();
+ renderAll();
+
+ alert(player.name+" SOLD to "+team.name+" for ₹"+amount);
+}
+
+
+function deleteAuction(i){
+
+ auction.splice(i,1);
+ save();
+ renderAll();
+}
+
+
+/* =========================
+   SCORING
+========================= */
+
+function addRun(n){
+
+ score.runs += n;
+ score.balls++;
+
+ saveScore();
+ renderScore();
+}
+
+
+function addWicket(){
+
+ score.wickets++;
+
+ score.balls++;
+
+ saveScore();
+ renderScore();
+}
+
+
+function resetScore(){
+
+ if(confirm("Reset live score?")){
+
+   score={
+     runs:0,
+     wickets:0,
+     balls:0
+   };
+
+   saveScore();
+   renderScore();
+ }
+}
+
+
+function saveScore(){
+ localStorage.setItem(
+   "turf_score",
+   JSON.stringify(score)
+ );
+}
+
+
+function renderScore(){
+
+ document.getElementById("runs").innerText=
+ score.runs;
+
+ document.getElementById("wickets").innerText=
+ score.wickets;
+
+ document.getElementById("overs").innerText=
+ Math.floor(score.balls/6)+"."+(score.balls%6);
+}
+
+
+/* =========================
+   RENDER PLAYERS
+========================= */
+
+function renderPlayers(){
+
+ const box=
+ document.getElementById("playersList");
+
+ if(players.length===0){
+   box.innerHTML='<div class="empty">No players added yet.</div>';
+   return;
+ }
+
+ box.innerHTML=players.map(p=>`
+
+ <div class="card player">
+
+   <div>
+     <strong>${escapeHTML(p.name)}</strong><br>
+     <span class="badge">${p.role}</span>
+     <small> Base: ₹${p.base}</small>
+     ${
+       p.sold
+       ? `<br><small>Sold: ₹${p.price}</small>`
+       : ""
+     }
+   </div>
+
+   <button class="btn red"
+   onclick="deletePlayer(${p.id})">
+   Delete
+   </button>
+
+ </div>
+
+ `).join("");
+}
+
+
+/* =========================
+   RENDER TEAMS
+========================= */
+
+function renderTeams(){
+
+ const box=
+ document.getElementById("teamsList");
+
+ if(teams.length===0){
+   box.innerHTML='<div class="empty">No teams added yet.</div>';
+   return;
+ }
+
+ box.innerHTML=teams.map(t=>`
+
+ <div class="card team">
+
+   <div>
+     <strong>🛡️ ${escapeHTML(t.name)}</strong><br>
+     <small>Captain/Owner: ${escapeHTML(t.owner || "-")}</small><br>
+     <small>Purse: ₹${t.budget}</small><br>
+     <small>Spent: ₹${t.spent}</small><br>
+     <span class="badge">
+       Players: ${t.squad.length}
+     </span>
+   </div>
+
+   <button class="btn red"
+   onclick="deleteTeam(${t.id})">
+   Delete
+   </button>
+
+ </div>
+
+ `).join("");
+}
+
+
+/* =========================
+   RENDER SQUADS
+========================= */
+
+function renderSquads(){
+
+ const box=
+ document.getElementById("squadsList");
+
+ if(teams.length===0){
+   box.innerHTML='<div class="empty">Create teams first.</div>';
+   return;
+ }
+
+ box.innerHTML=teams.map(t=>{
+
+   const squad =
+   players.filter(p=>t.squad.includes(p.id));
+
+   return `
+
+   <div class="card">
+
+     <h2>🛡️ ${escapeHTML(t.name)}</h2>
+
+     <p>
+       💰 Remaining Purse:
+       ₹${t.budget-t.spent}
+     </p>
+
+     ${
+       squad.length
+       ? `<table>
+          <tr>
+            <th>Player</th>
+            <th>Role</th>
+            <th>Price</th>
+          </tr>
+
+          ${squad.map(p=>`
+          <tr>
+            <td>${escapeHTML(p.name)}</td>
+            <td>${p.role}</td>
+            <td>₹${p.price}</td>
+          </tr>
+          `).join("")}
+
+         </table>`
+       : `<div class="empty">No players in squad.</div>`
+     }
+
+   </div>
+
+   `;
+
+ }).join("");
+}
+
+
+/* =========================
+   AUCTION SELECTS
+========================= */
+
+function renderAuction(){
+
+ const playerSelect=
+ document.getElementById("auctionPlayer");
+
+ const available=
+ players.filter(p=>!p.sold);
+
+ playerSelect.innerHTML=
+ '<option value="">Select player</option>'+
+ available.map(p=>
+ `<option value="${p.id}">
+ ${escapeHTML(p.name)} — Base ₹${p.base}
+ </option>`
+ ).join("");
+
+ const teamSelect=
+ document.getElementById("bidTeam");
+
+ teamSelect.innerHTML=
+ '<option value="">Select team</option>'+
+ teams.map(t=>
+ `<option value="${t.id}">
+ ${escapeHTML(t.name)} — ₹${t.budget-t.spent} left
+ </option>`
+ ).join("");
+
+ const history=
+ document.getElementById("auctionHistory");
+
+ if(!auction.length){
+   history.innerHTML=
+   '<div class="empty">No auction results yet.</div>';
+   return;
+ }
+
+ history.innerHTML=
+ auction.map((a,i)=>`
+
+ <div class="card">
+   🔨 <strong>${escapeHTML(a.player)}</strong>
+   → ${escapeHTML(a.team)}
+   <br>
+   💰 ₹${a.amount}
+   <small> • ${a.time}</small>
+ </div>
+
+ `).join("");
+}
+
+
+/* =========================
+   POINTS TABLE
+========================= */
+
+function renderPoints(){
+
+ const table=
+ document.getElementById("pointsTable");
+
+ const sorted=
+ [...teams].sort((a,b)=>b.points-a.points);
+
+ table.innerHTML=
+ sorted.map((t,i)=>`
+
+ <tr>
+   <td>${i+1}</td>
+   <td><strong>${escapeHTML(t.name)}</strong></td>
+   <td>${t.played}</td>
+   <td>${t.wins}</td>
+   <td>${t.losses}</td>
+   <td><strong>${t.points}</strong></td>
+ </tr>
+
+ `).join("");
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function renderDashboard(){
+
+ document.getElementById("playerCount")
+ .innerText=players.length;
+
+ document.getElementById("teamCount")
+ .innerText=teams.length;
+
+ document.getElementById("soldCount")
+ .innerText=players.filter(p=>p.sold).length;
+
+ document.getElementById("auctionValue")
+ .innerText=
+ players.reduce((sum,p)=>sum+(p.price||0),0);
+}
+
+
+/* =========================
+   SAVE
+========================= */
+
+function save(){
+
+ localStorage.setItem(
+   "turf_players",
+   JSON.stringify(players)
+ );
+
+ localStorage.setItem(
+   "turf_teams",
+   JSON.stringify(teams)
+ );
+
+ localStorage.setItem(
+   "turf_auction",
+   JSON.stringify(auction)
+ );
+}
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetAll(){
+
+ const ok=
+ confirm(
+ "⚠️ WARNING!\n\n"+
+ "This will delete ALL tournament data.\n\n"+
+ "Continue?"
+ );
+
+ if(!ok)return;
+
+ localStorage.removeItem("turf_players");
+ localStorage.removeItem("turf_teams");
+ localStorage.removeItem("turf_auction");
+ localStorage.removeItem("turf_score");
+
+ players=[];
+ teams=[];
+ auction=[];
+
+ score={
+   runs:0,
+   wickets:0,
+   balls:0
+ };
+
+ renderAll();
+ renderScore();
+
+ alert("All tournament data has been reset.");
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHTML(str){
+
+ return String(str)
+ .replaceAll("&","&amp;")
+ .replaceAll("<","&lt;")
+ .replaceAll(">","&gt;")
+ .replaceAll('"',"&quot;")
+ .replaceAll("'","&#039;");
+}
+
+
+/* =========================
+   RENDER EVERYTHING
+========================= */
+
+function renderAll(){
+
+ renderPlayers();
+ renderTeams();
+ renderSquads();
+ renderAuction();
+ renderPoints();
+ renderDashboard();
+ renderScore();
+}
+
+renderAll();
+
+</script>
+
+</body>
+  </html>
